@@ -38,11 +38,23 @@ async def latency_analytics(payload: dict):
         latencies = [r["latency_ms"] for r in records]
         uptimes = [r["uptime_pct"] for r in records]
 
+        if latencies:
+            avg_latency = round(sum(latencies) / len(latencies), 1)
+            p95_latency = round(float(np.percentile(latencies, 95)), 2)
+        else:
+            avg_latency = 0.0
+            p95_latency = 0.0
+
+        if uptimes:
+            avg_uptime = round(sum(uptimes) / len(uptimes), 3)
+        else:
+            avg_uptime = 0.0
+
         results.append({
             "region": region,
-            "avg_latency": round(sum(latencies) / len(latencies), 1),
-            "p95_latency": round(float(np.percentile(latencies, 95)), 2),
-            "avg_uptime": round(sum(uptimes) / len(uptimes), 3),
+            "avg_latency": avg_latency,
+            "p95_latency": p95_latency,
+            "avg_uptime": avg_uptime,
             "breaches": sum(
                 1 for r in records
                 if r["latency_ms"] > threshold_ms
